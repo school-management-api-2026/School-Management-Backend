@@ -13,11 +13,11 @@ class Subjects extends Model
         'description',
     ];
 
-    public function exam() {
-        return $this->belongsTo(Exams::class, 'subject_id');
+    public function exams() {
+        return $this->hasMany(Exams::class, 'subject_id');
     }
 
-    public function course() {
-        return $this->belongsTo(Courses::class, 'subject_id');
+    public function courses() {
+        return $this->hasMany(Courses::class, 'subject_id');
     }
 }

@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Authors extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'name',
+        'date_of_birth',
+        'gender',
+        'nation',
+    ];
+
+    public function authors() {
+        return $this->hasMany(Authors::class, 'author_id');
+    }
 }

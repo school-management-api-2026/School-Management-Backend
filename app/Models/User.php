@@ -34,6 +34,26 @@ class User extends Authenticatable
         return $this->belongsTo(Roles::class,'role_id');
     }
 
+    public function student() {
+        return $this->hasOne(Students::class, 'user_id');
+    }
+
+    public function teacher() {
+        return $this->hasOne(Teachers::class, 'user_id');
+    }
+
+    public function parent() {
+        return $this->hasOne(Parents::class, 'user_id');
+    }
+
+    public function attendance() {
+        return $this->hasOne(Attendances::class, 'user_id');
+    }
+
+    public function book_loan() {
+        return $this->hasOne(BookLoans::class, 'user_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

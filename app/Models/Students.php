@@ -16,15 +16,15 @@ class Students extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function book_loan() {
-        return $this->belongsTo(BookLoans::class, 'student_id');
+    public function book_loans() {
+        return $this->hasMany(BookLoans::class, 'student_id');
     }
 
-    public function student_parent() {
-        return $this->belongsTo(StudentParents::class, 'student_id');
+    public function student_parents() {
+        return $this->hasMany(StudentParents::class, 'student_id');
     }
 
-    public function enrollment() {
-        return $this->belongsTo(Enrollments::class, 'student_id');
+    public function enrollments() {
+        return $this->hasMany(Enrollments::class, 'student_id');
     }
 }

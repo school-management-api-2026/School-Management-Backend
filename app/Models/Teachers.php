@@ -13,20 +13,20 @@ class Teachers extends Model
         'user_id',
     ];
 
-    public function users() {
-        return $this->hasMany(User::class, 'user_id');
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function payroll() {
-        return $this->belongsTo(Payrolls::class, 'teacher_id');
+    public function payrolls() {
+        return $this->hasMany(Payrolls::class, 'teacher_id');
     }
 
-    public function teacher_course() {
-        return $this->belongsToMany(Courses::class, 'teacher_courses','teacher_Id','course_id');
+    public function teacher_courses() {
+        return $this->hasMany(TeacherCourses::class, 'teacher_id');
     }
 
-    public function exam() {
-        return $this->belongsTo(Exams::class, 'teacher_id');
+    public function exams() {
+        return $this->hasMany(Exams::class, 'teacher_id');
     }
 
 }
