@@ -1,0 +1,11 @@
+version: "3.8" # កំណត់ជំនាន់របស់ Docker Compose
+
+services:
+    db:
+        image: postgres:17
+        environment:
+            POSTGRES_DB: crud-database
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: sinh
+        ports:
+            - "5432:5432"
