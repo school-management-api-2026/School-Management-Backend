@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Enrollments;
 use Illuminate\Http\Request;
 
-class EnrollmentsController extends Controller
+class ExamController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +33,7 @@ class EnrollmentsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Enrollments $enrollments)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +41,7 @@ class EnrollmentsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Enrollments $enrollments)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +49,7 @@ class EnrollmentsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Enrollments $enrollments)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +57,7 @@ class EnrollmentsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Enrollments $enrollments)
+    public function destroy(string $id)
     {
         //
     }

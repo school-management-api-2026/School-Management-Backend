@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Roles;
 use Illuminate\Http\Request;
 
-class RolesController extends Controller
+class RoleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+   public function index()
     {
         $roles = Roles::all();
 
@@ -59,7 +59,7 @@ class RolesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Roles $roles)
+    public function edit(Roles $role)
     {
         //
     }
@@ -67,26 +67,26 @@ class RolesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Roles $roles)
+    public function update(Request $request, Roles $role)
     {
         $validated = $request->validate([
-            'name'=>'required|string|unique:roles,name'.$roles->id,
+            'name'=>'required|string|unique:roles,name'.$role->id,
         ]);
         
-        $roles->update($validated);
+        $role->update($validated);
         
         return response()->json([
             'message'=>'Updated role successfully.',
-            'data'=>$roles,
+            'data'=>$role,
         ],202);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Roles $roles)
+    public function destroy(Roles $role)
     {
-        $roles->delete();
+        $role->delete();
         return response()->json([
             'message'=>'Delete role successfully.',
         ],200);

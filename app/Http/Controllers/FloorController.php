@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Floors;
 use Illuminate\Http\Request;
 
-class FloorsController extends Controller
+class FloorController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +33,7 @@ class FloorsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Floors $floors)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +41,7 @@ class FloorsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Floors $floors)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +49,7 @@ class FloorsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Floors $floors)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +57,7 @@ class FloorsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Floors $floors)
+    public function destroy(string $id)
     {
         //
     }

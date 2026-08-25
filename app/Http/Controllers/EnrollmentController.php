@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Fines;
 use Illuminate\Http\Request;
 
-class FinesController extends Controller
+class EnrollmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +33,7 @@ class FinesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Fines $fines)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +41,7 @@ class FinesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Fines $fines)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +49,7 @@ class FinesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Fines $fines)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +57,7 @@ class FinesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Fines $fines)
+    public function destroy(string $id)
     {
         //
     }
