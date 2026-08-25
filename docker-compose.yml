@@ -4,7 +4,7 @@ services:
     db:
         image: postgres:17
         environment:
-            POSTGRES_DB: crud-database
+            POSTGRES_DB: school-management-database
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: sinh
         ports:
