@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BookCopies;
 use Illuminate\Http\Request;
 
-class BookCopiesController extends Controller
+class RoomController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +33,7 @@ class BookCopiesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BookCopies $bookCopies)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +41,7 @@ class BookCopiesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BookCopies $bookCopies)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +49,7 @@ class BookCopiesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BookCopies $bookCopies)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +57,7 @@ class BookCopiesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BookCopies $bookCopies)
+    public function destroy(string $id)
     {
         //
     }

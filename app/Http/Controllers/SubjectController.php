@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Books;
 use Illuminate\Http\Request;
 
-class BooksController extends Controller
+class SubjectController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +33,7 @@ class BooksController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Books $books)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +41,7 @@ class BooksController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Books $books)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +49,7 @@ class BooksController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Books $books)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +57,7 @@ class BooksController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Books $books)
+    public function destroy(string $id)
     {
         //
     }

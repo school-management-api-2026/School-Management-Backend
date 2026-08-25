@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Rooms;
 use Illuminate\Http\Request;
 
-class RoomsController extends Controller
+class TeacherController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +33,7 @@ class RoomsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Rooms $rooms)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +41,7 @@ class RoomsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Rooms $rooms)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +49,7 @@ class RoomsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Rooms $rooms)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +57,7 @@ class RoomsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rooms $rooms)
+    public function destroy(string $id)
     {
         //
     }
