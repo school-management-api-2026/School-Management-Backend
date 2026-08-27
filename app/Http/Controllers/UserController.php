@@ -44,7 +44,7 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id'
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
+        $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
 
@@ -57,11 +57,11 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $users)
+    public function show(User $user)
     {
         return response()->json([
             'message' => 'Get all users',
-            'data' => $users,
+            'data' => $user,
         ],200);
     }
 
@@ -93,7 +93,7 @@ class UserController extends Controller
             if (Hash::check($request->password, $user->password)) {
                 unset($validated['password']); // បើ Password ដូចគ្នា គឺដកចេញមិនបាច់ update
             } else {
-                $validated['password'] = bcrypt($validated['password']); // បើប្តូរថ្មី ធ្វើការ Hash
+                $validated['password'] = Hash::make($validated['password']); // បើប្តូរថ្មី ធ្វើការ Hash
             }
         } else {
             unset($validated['password']);

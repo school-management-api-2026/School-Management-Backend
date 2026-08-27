@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Students;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
@@ -11,7 +12,11 @@ class StudentController extends Controller
      */
     public function index()
     {
-        //
+        $students = Students::all();
+        return response()->json([
+            'message' => 'Get all student successfully',
+            'data' => $students,
+        ],201);
     }
 
     /**
@@ -27,7 +32,16 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'user_id' => 'required|integer|exists:users,id|unique:students,user_id',
+        ]);
+
+        $student = Students::create($validated);
+
+        return response()->json([
+            'message' => 'Create student successfully',
+            'data' => $student
+        ],200);   
     }
 
     /**
