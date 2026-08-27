@@ -2,21 +2,57 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash; // <--- បន្ថែម Facade នេះ
+use App\Models\User;
+use App\Models\Roles;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // បង្កើត Roles
+        Roles::create(['name' => 'Admin']);
+        Roles::create(['name' => 'Teacher']);
+        Roles::create(['name' => 'Library_staff']);
+        Roles::create(['name' => 'Student']);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // បង្កើត Admin User
+        User::create([
+            'name' => 'superadmin',
+            'username' => 'superadmin',
+            'email' => 'superadmin@gmail.com',
+            'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
+            'phone' => '1234556667',
+            'role_id' => 1
+        ]);
+
+        \App\Models\User::factory()->create([
+            'name' => 'sinh',
+            'username' => 'sinhadmin',
+            'email' => 'sinhadmin@gmail.com',
+            'password' => bcrypt('superadmin'),
+            'phone' => "1234556667",
+            'role_id' => 2
+        ]);
+
+        \App\Models\User::factory()->create([
+            'name' => 'staff',
+            'username' => 'staff',
+            'email' => 'staff@gmail.com',
+            'password' => bcrypt('staff'),
+            'phone' => "1234556667",
+            'role_id' => 3
+        ]);
+
+        // បង្កើត Student User
+        User::create([
+            'name' => 'sinh',
+            'username' => 'sinhadmin',
+            'email' => 'sinhadmin@gmail.com',
+            'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
+            'phone' => '1234556667',
+            'role_id' => 4
+        ]);
     }
 }
