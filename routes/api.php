@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,7 +27,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::apiResource('/users', UserController::class)->middleware('role:1');//only admin
-    Route::apiResource('/roles',RoleController::class)->middleware('role:1');
+    Route::apiResource('/user', UserController::class)->middleware('role:1,2,3');//only admin
+    Route::apiResource('/role', RoleController::class)->middleware('role:1');
+    Route::apiResource('/student', StudentController::class)->middleware('role:1');
 });
 
