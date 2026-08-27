@@ -41,8 +41,15 @@ class UserController extends Controller
             'phone' => 'nullable|string|unique:users,phone',
             'gender' => 'nullable|string|max:30',
             'date_of_birth' => 'nullable|date',
+            'image' => 'nullable|file|max:2048|mimes:png,webp,jpg,jpeg,svg',
             'role_id' => 'required|exists:roles,id'
         ]);
+
+        if($request->hasFile('image')) {
+            $uploadedFileUrl = $request->file('image')->storeOnCloudinary('users')->getSecureUrl();
+
+            $validated['image'] = $uploadedFileUrl;
+        }
 
         $validated['password'] = Hash::make($validated['password']);
 
@@ -60,7 +67,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         return response()->json([
-            'message' => 'Get all users',
+            'message' => 'Get user detail successfully',
             'data' => $user,
         ],200);
     }
@@ -86,14 +93,38 @@ class UserController extends Controller
             'phone' => 'nullable|string|unique:users,phone,' . $user->id,
             'gender' => 'nullable|string|max:30',
             'date_of_birth' => 'nullable|date',
+            'image' => 'nullable|file|max:2048|mimes:png,webp,jpg,jpeg,svg',
             'role_id' => 'required|exists:roles,id'
         ]);
+            
+        if($request->hasFile('image')) {
+            // code for delete image into cloudinary
+            if($user->image) {
+                try {
+                    $path = parse_url($user->image, PHP_URL_PATH);
+                    
+                    $pathWithoutExtension = pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
+                    
+                    $publicId = ltrim(strstr($pathWithoutExtension, 'users/'), '/');
 
+                    if($publicId) {
+                        app('cloudinary')->uploadApi()->destroy($publicId);
+                    }
+
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
+            }
+            // add new image into cloudinary
+            $uploadedFileUrl = $request->file('image')->storeOnCloudinary('users')->getSecureUrl();
+            $validated['image'] = $uploadedFileUrl;
+        }
+            
         if (!empty($validated['password'])) {
             if (Hash::check($request->password, $user->password)) {
-                unset($validated['password']); // បើ Password ដូចគ្នា គឺដកចេញមិនបាច់ update
+                unset($validated['password']); 
             } else {
-                $validated['password'] = Hash::make($validated['password']); // បើប្តូរថ្មី ធ្វើការ Hash
+                $validated['password'] = Hash::make($validated['password']);
             }
         } else {
             unset($validated['password']);
@@ -126,10 +157,27 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        if($user ->image) {
+            try {
+
+                $path = parse_url($user->image, PHP_URL_PATH);
+                $pathWithoutExtension = pathinfo($path, PATHINFO_BASENAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
+                
+                $publicId = ltrim(strstr($pathWithoutExtension, 'users/'), '/');
+
+                if($publicId) {
+                    app('cloudinary')->uploadApi()->destroy($publicId);
+                }
+
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+        }
+
         $user->delete();
 
         return response()->json([
-            'message' => 'Delete user successfully'
+            'message' => 'Delete user and image from Cloudinary successfully'
         ],200);
     }
 }

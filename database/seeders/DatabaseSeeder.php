@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'sinh',
             'username' => 'sinhadmin',
-            'email' => 'sinhadmin@gmail.com',
+            'email' => 'sinhnaadmin@gmail.com',
             'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
             'phone' => '1234556667',
             'role_id' => 4
