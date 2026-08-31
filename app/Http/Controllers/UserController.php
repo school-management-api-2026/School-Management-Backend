@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\CloudinaryService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -17,7 +19,7 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Get all users',
             'data' => $users,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -31,34 +33,41 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'nullable|string|max:150|unique:users,username',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'nullable|string|unique:users,phone',
-            'gender' => 'nullable|string|max:30',
-            'date_of_birth' => 'nullable|date',
-            'image' => 'nullable|file|max:2048|mimes:png,webp,jpg,jpeg,svg',
-            'role_id' => 'required|exists:roles,id'
-        ]);
+        $validated = $request->validated();
 
-        if($request->hasFile('image')) {
-            $uploadedFileUrl = $request->file('image')->storeOnCloudinary('users')->getSecureUrl();
+        DB::beginTransaction();
 
-            $validated['image'] = $uploadedFileUrl;
+        try {
+            
+            $year = date('Y');
+            $latestUser = User::lockForUpdate()->latest()->first();
+            $nextId = $latestUser ? $latestUser->id + 1 : 1;
+            $validated['code'] = 'USR-' . $year . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
+
+            if ($request->hasFile('image')) {
+                $validated['image'] = CloudinaryService::upload($request->file('image'), 'users');
+            }
+
+            $validated['password'] = Hash::make($validated['password']);
+
+            $user = User::create($validated);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Created user successfully with auto code.',
+                'data' => $user,
+            ], 201);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create user',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $validated['password'] = Hash::make($validated['password']);
-
-        $user = User::create($validated);
-
-        return response()->json([
-            'message'=>'Created user successfully.',
-            'data'=>$user,
-        ],201);
     }
 
     /**
@@ -69,7 +78,7 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Get user detail successfully',
             'data' => $user,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -83,41 +92,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(StoreUserRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'nullable|string|max:150|unique:users,username,' . $user->id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6',
-            'phone' => 'nullable|string|unique:users,phone,' . $user->id,
-            'gender' => 'nullable|string|max:30',
-            'date_of_birth' => 'nullable|date',
-            'image' => 'nullable|file|max:2048|mimes:png,webp,jpg,jpeg,svg',
-            'role_id' => 'required|exists:roles,id'
-        ]);
+        $validated = $request->validated();
             
-        if($request->hasFile('image')) {
-            // code for delete image into cloudinary
-            if($user->image) {
-                try {
-                    $path = parse_url($user->image, PHP_URL_PATH);
-                    
-                    $pathWithoutExtension = pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
-                    
-                    $publicId = ltrim(strstr($pathWithoutExtension, 'users/'), '/');
-
-                    if($publicId) {
-                        app('cloudinary')->uploadApi()->destroy($publicId);
-                    }
-
-                } catch (\Throwable $th) {
-                    //throw $th;
-                }
-            }
-            // add new image into cloudinary
-            $uploadedFileUrl = $request->file('image')->storeOnCloudinary('users')->getSecureUrl();
-            $validated['image'] = $uploadedFileUrl;
+        if ($request->hasFile('image')) {
+            CloudinaryService::delete($user->image, 'users');
+            $validated['image'] = CloudinaryService::upload($request->file('image'), 'users');
         }
             
         if (!empty($validated['password'])) {
@@ -131,14 +112,14 @@ class UserController extends Controller
         }
 
         $hasChange = false;
-        foreach($validated as $key => $value) {
-            if($user->{$key} != $value){
+        foreach ($validated as $key => $value) {
+            if ($user->{$key} != $value) {
                 $hasChange = true;
                 break;
             }
         }
 
-        if(!$hasChange) {
+        if (!$hasChange) {
             return response()->json([
                 'message' => 'Nothing user update',
             ]);
@@ -149,7 +130,7 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Update user successfuly',
             'data' => $user,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -157,27 +138,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if($user ->image) {
-            try {
-
-                $path = parse_url($user->image, PHP_URL_PATH);
-                $pathWithoutExtension = pathinfo($path, PATHINFO_BASENAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
-                
-                $publicId = ltrim(strstr($pathWithoutExtension, 'users/'), '/');
-
-                if($publicId) {
-                    app('cloudinary')->uploadApi()->destroy($publicId);
-                }
-
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
-        }
+        CloudinaryService::delete($user->image, 'users');
 
         $user->delete();
 
         return response()->json([
             'message' => 'Delete user and image from Cloudinary successfully'
-        ],200);
+        ], 200);
     }
 }

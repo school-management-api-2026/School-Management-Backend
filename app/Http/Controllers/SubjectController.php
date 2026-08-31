@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subjects;
 use Illuminate\Http\Request;
 
 class SubjectController extends Controller
@@ -11,7 +12,11 @@ class SubjectController extends Controller
      */
     public function index()
     {
-        //
+        $subjects = Subjects::all();
+        return response()->json([
+            'message' => 'Get all subject successfully',
+            'data' => $subjects,
+        ],200);
     }
 
     /**
@@ -27,15 +32,28 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|text',
+        ]);
+
+        $subject = Subjects::create($validated);
+
+        return response()->json([
+            'message' => 'Created subject successfully.',
+            'data' => $subject,
+        ],201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Subjects $subject)
     {
-        //
+        return response()->json([
+            'message' => 'Get subject by id successfully',
+            'data' => $subject,
+        ],200);
     }
 
     /**
@@ -49,16 +67,30 @@ class SubjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Subjects $subject)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|text',
+        ]);
+
+        $subject -> update($validated);
+
+        return response()->json([
+            'message' => 'Updated subject successfully',
+            'data' => $subject,
+        ],200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Subjects $subject)
     {
-        //
+        $subject->delete();
+
+        return response()->json([
+            'message' => 'Delete subject successfully',
+        ],200);
     }
 }

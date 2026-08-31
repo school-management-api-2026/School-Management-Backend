@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Students;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,7 +16,9 @@ class StudentController extends Controller
      */
     public function index()
     {
+
         $students = Students::with('user')->get();
+
         return response()->json([
             'message' => 'Get all student successfully',
             'data' => $students,
@@ -33,21 +36,14 @@ class StudentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreStudentRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'nullable|string|max:150|unique:users,username',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'nullable|string|unique:users,phone',
-            'gender' => 'nullable|string|max:30',
-            'date_of_birth' => 'nullable|date',
-            'role_id' => 'required|exists:roles,id',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
+
         try {
+
             $year = date('Y');
             
             $latestStudent = Students::lockForUpdate()->latest()->first();
@@ -95,8 +91,11 @@ class StudentController extends Controller
      */
     public function show(Students $student)
     {
+
         $student->load('user');
+
         return response()->json([
+
             'message' => 'Get student detail successfully',
             'data' => $student,
         ],200);
@@ -113,21 +112,11 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Students $student)
+    public function update(UpdateStudentRequest $request, Students $student)
     {
         $user = $student->user;
 
-        $validated = $request->validate([
-            'code' => 'sometimes|string|max:50|unique:students,code,' . $student->id,
-            'name' => 'sometimes|required|string|max:255',
-            'username' => 'nullable|string|max:150|unique:users,username,' . $user->id,
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6',
-            'phone' => 'nullable|string|unique:users,phone,' . $user->id,
-            'gender' => 'nullable|string|max:30',
-            'date_of_birth' => 'nullable|date',
-            'role_id' => 'sometimes|required|exists:roles,id',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
         try {
@@ -179,6 +168,7 @@ class StudentController extends Controller
             
             // delete student before user
             $student->delete();
+            
             if ($user) {
                 $user->delete();
             }
