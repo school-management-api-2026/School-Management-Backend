@@ -45,7 +45,7 @@ class StudentController extends Controller
         try {
 
             $year = date('Y');
-            
+
             $latestStudent = Students::lockForUpdate()->latest()->first();
             $nextId = $latestStudent ? $latestStudent->id + 1 : 1;
             $studentCode = 'ST-' . $year . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
@@ -165,10 +165,10 @@ class StudentController extends Controller
         DB::beginTransaction();
         try {
             $user = $student->user;
-            
+
             // delete student before user
             $student->delete();
-            
+
             if ($user) {
                 $user->delete();
             }
