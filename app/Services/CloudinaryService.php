@@ -2,72 +2,67 @@
 
 namespace App\Services;
 
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class CloudinaryService
 {
-    public static function upload(
-        ?UploadedFile $file,
-        string $folder = 'users'
-    ): ?string {
-
+    public static function upload($file, string $folder)
+    {
         if (!$file) {
             return null;
         }
 
-        try {
+        $uploadedFile = Cloudinary::upload(
+            $file->getRealPath(),
+            [
+                'folder' => $folder,
+            ]
+        );
 
-            $uploadedFile = $file->storeOnCloudinary($folder);
-
-            return $uploadedFile->getSecureUrl();
-
-        } catch (\Throwable $th) {
-
-            Log::error('Cloudinary upload failed', [
-                'message' => $th->getMessage(),
-                'file' => $file->getClientOriginalName(),
-            ]);
-
-            throw $th;
-        }
+        return $uploadedFile->getSecurePath();
     }
 
-    public static function delete(
-        ?string $imageUrl,
-        string $folder = 'users'
-    ): void {
-
+    public static function delete($imageUrl)
+    {
         if (!$imageUrl) {
             return;
         }
 
-        try {
+        $publicId = self::extractPublicId($imageUrl);
 
-            $path = parse_url($imageUrl, PHP_URL_PATH);
-
-            $pathWithoutExtension =
-                pathinfo($path, PATHINFO_DIRNAME)
-                . '/'
-                . pathinfo($path, PATHINFO_FILENAME);
-
-            $publicId = ltrim(
-                strstr($pathWithoutExtension, $folder . '/'),
-                '/'
-            );
-
-            if ($publicId) {
-                app('cloudinary')
-                    ->uploadApi()
-                    ->destroy($publicId);
-            }
-
-        } catch (\Throwable $th) {
-
-            Log::error('Cloudinary delete failed', [
-                'message' => $th->getMessage(),
-                'image_url' => $imageUrl,
-            ]);
+        if (!$publicId) {
+            return;
         }
+
+        Cloudinary::destroy($publicId);
+    }
+
+    private static function extractPublicId(string $imageUrl)
+    {
+        if (!str_contains($imageUrl, '/image/upload/')) {
+            return null;
+        }
+
+        $chunks = explode('/image/upload/', $imageUrl);
+
+        $tail = end($chunks);
+
+        $parts = explode('/', $tail);
+
+        // Remove version: v123456
+        if (isset($parts[0]) && preg_match('/^v\d+$/', $parts[0])) {
+            array_shift($parts);
+        }
+
+        $tail = implode('/', $parts);
+
+        // Remove extension
+        $lastDot = strrpos($tail, '.');
+
+        if ($lastDot !== false) {
+            $tail = substr($tail, 0, $lastDot);
+        }
+
+        return $tail ?: null;
     }
 }

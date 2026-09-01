@@ -47,7 +47,19 @@ class UserController extends Controller
             $validated['code'] = 'USR-' . $year . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
 
             if ($request->hasFile('image')) {
-                $validated['image'] = CloudinaryService::upload($request->file('image'), 'users');
+
+                logger('Image exists');
+
+                logger([
+                    'file' => $request->file('image')->getClientOriginalName(),
+                    'path' => $request->file('image')->getRealPath(),
+                    'valid' => $request->file('image')->isValid(),
+                ]);
+
+                $validated['image'] = CloudinaryService::upload(
+                    $request->file('image'),
+                    'users'
+                );
             }
 
             $validated['password'] = Hash::make($validated['password']);

@@ -13,7 +13,7 @@ class TeacherController extends Controller
 {
     public function index()
     {
-        $teachers = Teachers::with('user')->get();
+        $teachers = Teachers::with('user.role')->get();
 
         return response()->json([
 
@@ -43,7 +43,19 @@ class TeacherController extends Controller
             $validated['code'] = 'USR-' . $year . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
 
             if ($request->hasFile('image')) {
-                $validated['image'] = CloudinaryService::upload($request->file('image'), 'teachers');
+
+                logger('Image exists');
+
+                logger([
+                    'file' => $request->file('image')->getClientOriginalName(),
+                    'path' => $request->file('image')->getRealPath(),
+                    'valid' => $request->file('image')->isValid(),
+                ]);
+
+                $validated['image'] = CloudinaryService::upload(
+                    $request->file('image'),
+                    'teachers'
+                );
             }
 
             $validated['password'] = Hash::make($validated['password']);
