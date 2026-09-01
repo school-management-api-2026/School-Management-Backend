@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::with('role')->get();
         return response()->json([
             'message' => 'Get all users',
             'data' => $users,
@@ -75,6 +75,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $user->load('role');
+
         return response()->json([
             'message' => 'Get user detail successfully',
             'data' => $user,
