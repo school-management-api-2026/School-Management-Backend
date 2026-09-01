@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreTeacherRequest;
-use App\Http\Requests\UpdateTeacherRequest;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\Teachers;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,9 +14,12 @@ class TeacherController extends Controller
     public function index()
     {
         $teachers = Teachers::with('user')->get();
+
         return response()->json([
+
             'message' => 'Get all teacher successfully',
             'data' => $teachers,
+            
         ], 200);
     }
 
@@ -25,36 +28,38 @@ class TeacherController extends Controller
         //
     }
 
-    public function store(StoreTeacherRequest $request)
+    public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
 
         DB::beginTransaction();
 
         try {
-            $user = User::create([
-                'name' => $validated['name'],
-                'username' => $validated['username'] ?? null,
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'phone' => $validated['phone'] ?? null,
-                'gender' => $validated['gender'] ?? null,
-                'date_of_birth' => $validated['date_of_birth'] ?? null,
-                'role_id' => $validated['role_id'],
-            ]);
+            $year = date('Y');
+            
+
+            $latestUser = User::lockForUpdate()->latest()->first();
+            $nextId = $latestUser ? $latestUser->id + 1 : 1;
+            $validated['code'] = 'USR-' . $year . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
+
+            if ($request->hasFile('image')) {
+                $validated['image'] = CloudinaryService::upload($request->file('image'), 'teachers');
+            }
+
+            $validated['password'] = Hash::make($validated['password']);
+
+            $user = User::create($validated);
 
             $teacher = Teachers::create([
-                'hire_date' => $validated['hire_date'],
                 'user_id' => $user->id,
+                'hire_date' => $validated['hire_date'] ?? $request->input('hire_date'),
             ]);
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Created teacher successfully',
-                'data' => [
-                    'teacher' => $teacher->load('user'),
-                ],
+                'message' => 'Created teacher successfully.',
+                'data' => $teacher->load('user'),
             ], 201);
 
         } catch (\Throwable $e) {
@@ -68,7 +73,7 @@ class TeacherController extends Controller
 
     public function show(Teachers $teacher)
     {
-        $teacher->load('user');
+        $teacher->load('user.role');
         
         return response()->json([
             'message' => 'Get teacher detail successfully',
@@ -81,7 +86,7 @@ class TeacherController extends Controller
         //
     }
 
-    public function update(UpdateTeacherRequest $request, Teachers $teacher)
+    public function update(StoreUserRequest $request, Teachers $teacher)
     {
         $user = $teacher->user;
 
@@ -97,16 +102,17 @@ class TeacherController extends Controller
                 }
             }
 
+            if ($request->hasFile('image')) {
+                CloudinaryService::delete($user->image, 'teachers');
+                $userData['image'] = CloudinaryService::upload($request->file('image'), 'teachers');
+            }
+
             if (!empty($validated['password'])) {
                 $userData['password'] = Hash::make($validated['password']);
             }
 
             if (!empty($userData)) {
                 $user->update($userData);
-            }
-
-            if ($request->has('hire_date')) {
-                $teacher->update(['hire_date' => $validated['hire_date']]);
             }
 
             DB::commit();
@@ -130,6 +136,11 @@ class TeacherController extends Controller
         DB::beginTransaction();
         try {
             $user = $teacher->user;
+
+            if($user && $user->image) {
+
+                CloudinaryService::delete($user->image, 'teachers');
+            }
 
             $teacher->delete();
             if ($user) {
