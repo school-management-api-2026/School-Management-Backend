@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\CloudinaryService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -13,11 +15,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::with('role')->get();
         return response()->json([
             'message' => 'Get all users',
             'data' => $users,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -31,27 +33,53 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'nullable|string|max:150|unique:users,username',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'nullable|string|unique:users,phone',
-            'gender' => 'nullable|string|max:30',
-            'date_of_birth' => 'nullable|date',
-            'role_id' => 'required|exists:roles,id'
-        ]);
+        $validated = $request->validated();
 
-        $validated['password'] = Hash::make($validated['password']);
+        DB::beginTransaction();
 
-        $user = User::create($validated);
+        try {
+            
+            $year = date('Y');
+            $latestUser = User::lockForUpdate()->latest()->first();
+            $nextId = $latestUser ? $latestUser->id + 1 : 1;
+            $validated['code'] = 'USR-' . $year . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
 
-        return response()->json([
-            'message'=>'Created user successfully.',
-            'data'=>$user,
-        ],201);
+            if ($request->hasFile('image')) {
+
+                logger('Image exists');
+
+                logger([
+                    'file' => $request->file('image')->getClientOriginalName(),
+                    'path' => $request->file('image')->getRealPath(),
+                    'valid' => $request->file('image')->isValid(),
+                ]);
+
+                $validated['image'] = CloudinaryService::upload(
+                    $request->file('image'),
+                    'users'
+                );
+            }
+
+            $validated['password'] = Hash::make($validated['password']);
+
+            $user = User::create($validated);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Created user successfully with auto code.',
+                'data' => $user,
+            ], 201);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -59,10 +87,12 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $user->load('role');
+
         return response()->json([
-            'message' => 'Get all users',
+            'message' => 'Get user detail successfully',
             'data' => $user,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -76,38 +106,34 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(StoreUserRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'nullable|string|max:150|unique:users,username,' . $user->id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6',
-            'phone' => 'nullable|string|unique:users,phone,' . $user->id,
-            'gender' => 'nullable|string|max:30',
-            'date_of_birth' => 'nullable|date',
-            'role_id' => 'required|exists:roles,id'
-        ]);
-
+        $validated = $request->validated();
+            
+        if ($request->hasFile('image')) {
+            CloudinaryService::delete($user->image, 'users');
+            $validated['image'] = CloudinaryService::upload($request->file('image'), 'users');
+        }
+            
         if (!empty($validated['password'])) {
             if (Hash::check($request->password, $user->password)) {
-                unset($validated['password']); // បើ Password ដូចគ្នា គឺដកចេញមិនបាច់ update
+                unset($validated['password']); 
             } else {
-                $validated['password'] = Hash::make($validated['password']); // បើប្តូរថ្មី ធ្វើការ Hash
+                $validated['password'] = Hash::make($validated['password']);
             }
         } else {
             unset($validated['password']);
         }
 
         $hasChange = false;
-        foreach($validated as $key => $value) {
-            if($user->{$key} != $value){
+        foreach ($validated as $key => $value) {
+            if ($user->{$key} != $value) {
                 $hasChange = true;
                 break;
             }
         }
 
-        if(!$hasChange) {
+        if (!$hasChange) {
             return response()->json([
                 'message' => 'Nothing user update',
             ]);
@@ -118,7 +144,7 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Update user successfuly',
             'data' => $user,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -126,10 +152,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        CloudinaryService::delete($user->image, 'users');
+
         $user->delete();
 
         return response()->json([
-            'message' => 'Delete user successfully'
-        ],200);
+            'message' => 'Delete user and image from Cloudinary successfully'
+        ], 200);
     }
 }

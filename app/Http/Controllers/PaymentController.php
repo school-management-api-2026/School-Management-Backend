@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payments;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -11,7 +12,12 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        //
+        $payments = Payments::all();
+
+        return response()->json([
+            'message' => 'Get all payments successfully',
+            'data' => $payments,
+        ],200);
     }
 
     /**
@@ -33,9 +39,12 @@ class PaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Payments $payment)
     {
-        //
+        return response()->json([
+            'message' => 'Get payment by id successfully',
+            'data' => $payment,
+        ],200);
     }
 
     /**
@@ -57,8 +66,12 @@ class PaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Payments $payment)
     {
-        //
+        $payment->delete();
+
+        return response()->json([
+            'message' => 'Delete payment successfully',
+        ],200);  
     }
 }
