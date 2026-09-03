@@ -127,6 +127,12 @@ class TeacherController extends Controller
                 $user->update($userData);
             }
 
+            if ($request->has('hire_date')) {
+                $teacher->update([
+                    'hire_date' => $request->input('hire_date')
+                ]);
+            }
+
             DB::commit();
 
             return response()->json([

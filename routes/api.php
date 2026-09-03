@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -34,5 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/student', StudentController::class)->middleware('role:1');
     Route::apiResource('/teacher', TeacherController::class)->middleware('role:1');
     Route::apiResource('/subject', SubjectController::class)->middleware('role:1');
+    Route::apiResource('/subject', SubjectController::class)->middleware('role:1');
+    Route::apiResource('/building', BuildingController::class)->middleware('role:1');
 });
 
