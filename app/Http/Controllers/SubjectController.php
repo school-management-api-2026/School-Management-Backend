@@ -34,7 +34,7 @@ class SubjectController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'description' => 'nullable|text',
+            'description' => 'nullable|string',
         ]);
 
         $subject = Subjects::create($validated);
@@ -71,7 +71,7 @@ class SubjectController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'description' => 'nullable|text',
+            'description' => 'nullable|string',
         ]);
 
         $subject -> update($validated);

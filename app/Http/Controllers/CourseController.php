@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Courses;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
@@ -11,7 +12,12 @@ class CourseController extends Controller
      */
     public function index()
     {
-        //
+        $courses = Courses::all();
+
+        return response()->json([
+            'message' => 'Get all courses successfully',
+            'data' => $courses,
+        ], 200);
     }
 
     /**
@@ -27,15 +33,32 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'unit_price' => 'required|numeric',
+            'promotion' => 'nullable|numeric',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'capacity' => 'required|integer',
+            'subject_id' => 'required|integer',
+        ]);
+
+        $course = Courses::create($validated);
+
+        return response()->json([
+            'message' => 'Created course successfully',
+            'data' => $course,
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Courses $course)
     {
-        //
+        return response()->json([
+            'message' => 'Get course by id successfully',
+            'data' => $course,
+        ], 200);
     }
 
     /**
@@ -49,16 +72,34 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Courses $course)
     {
-        //
+        $validated = $request->validate([
+            'unit_price' => 'required|numeric',
+            'promotion' => 'nullable|numeric',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'capacity' => 'required|integer',
+            'subject_id' => 'required|integer',
+        ]);
+
+        $course->update($validated);
+
+        return response()->json([
+            'message' => 'Updated course successfully',
+            'data' => $course,
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Courses $course)
     {
-        //
+        $course->delete();
+
+        return response()->json([
+            'message' => 'Delete course successfully',
+        ], 200);
     }
 }

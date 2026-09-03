@@ -2,6 +2,12 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuildingController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\ExamController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -35,7 +41,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/student', StudentController::class)->middleware('role:1');
     Route::apiResource('/teacher', TeacherController::class)->middleware('role:1');
     Route::apiResource('/subject', SubjectController::class)->middleware('role:1');
-    Route::apiResource('/subject', SubjectController::class)->middleware('role:1');
     Route::apiResource('/building', BuildingController::class)->middleware('role:1');
+    Route::apiResource('/payment', PaymentController::class)->middleware('role:1');
+    Route::apiResource('/enrollment', EnrollmentController::class)->middleware('role:1');
+    Route::apiResource('/exam', ExamController::class)->middleware('role:1');
+    Route::apiResource('/course', CourseController::class)->middleware('role:1');
+    Route::apiResource('/invoice', InvoiceController::class)->middleware('role:1');
+    Route::apiResource('/result', ResultController::class)->middleware('role:1');
+
+
 });
 

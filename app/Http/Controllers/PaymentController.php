@@ -33,7 +33,20 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'amount_paid' => 'required|numeric',
+            'payment_method' => 'required|string',
+            'payment_date' => 'required|date',
+            'status' => 'required|string',
+            'invoice_id' => 'required|integer',
+        ]);
+
+        $payment = Payments::create($validated);
+
+        return response()->json([
+            'message' => 'Created payment successfully',
+            'data' => $payment,
+        ],201);
     }
 
     /**
@@ -41,6 +54,8 @@ class PaymentController extends Controller
      */
     public function show(Payments $payment)
     {
+        $payment->load('invoice');
+
         return response()->json([
             'message' => 'Get payment by id successfully',
             'data' => $payment,
@@ -58,9 +73,22 @@ class PaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Payments $payment)
     {
-        //
+        $validated = $request->validate([
+            'amount_paid' => 'required|numeric',
+            'payment_method' => 'required|string',
+            'payment_date' => 'required|date',
+            'status' => 'required|string',
+            'invoice_id' => 'required|integer',
+        ]);
+
+        $payment->update($validated);
+
+        return response()->json([
+            'message' => 'Updated payment successfully',
+            'data' => $payment,
+        ],200);
     }
 
     /**
