@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         Roles::create(['name' => 'Teacher']);
         Roles::create(['name' => 'Library_staff']);
         Roles::create(['name' => 'Student']);
+        Roles::create(['name' => 'Parent']);
 
         // បង្កើត Admin User
         User::create([
@@ -53,6 +54,15 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
             'phone' => '1234556667',
             'role_id' => 4
+        ]);
+
+        User::create([
+            'name' => 'si',
+            'username' => 'siadmin',
+            'email' => 'siadmin@gmail.com',
+            'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
+            'phone' => '1234556667888',
+            'role_id' => 5
         ]);
     }
 }

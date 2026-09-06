@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Floors;
+use App\Models\TeacherCourses;
 use Illuminate\Http\Request;
 
-class FloorController extends Controller
+class TeacherCourseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $floors = Floors::all();
+        $teacherCourses = TeacherCourses::all();
 
         return response()->json([
-            'message' => 'Get all floors successfully',
-            'data' => $floors,
+            'message' => 'Get all teacher courses successfully',
+            'data' => $teacherCourses,
         ], 200);
     }
 
@@ -34,26 +34,26 @@ class FloorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'floor_number' => 'required|integer',
-            'building_id' => 'required|integer',
+            'teacher_id' => 'required|integer',
+            'course_id' => 'required|integer',
         ]);
 
-        $floor = Floors::create($validated);
+        $teacherCourse = TeacherCourses::create($validated);
 
         return response()->json([
-            'message' => 'Created floor successfully',
-            'data' => $floor,
+            'message' => 'Created teacher course successfully',
+            'data' => $teacherCourse,
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Floors $floor)
+    public function show(TeacherCourses $teacherCourse)
     {
         return response()->json([
-            'message' => 'Get floor by id successfully',
-            'data' => $floor,
+            'message' => 'Get teacher course by id successfully',
+            'data' => $teacherCourse,
         ], 200);
     }
 
@@ -68,30 +68,30 @@ class FloorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Floors $floor)
+    public function update(Request $request, TeacherCourses $teacherCourse)
     {
         $validated = $request->validate([
-            'floor_number' => 'required|integer',
-            'building_id' => 'required|integer',
+            'teacher_id' => 'required|integer',
+            'course_id' => 'required|integer',
         ]);
 
-        $floor->update($validated);
+        $teacherCourse->update($validated);
 
         return response()->json([
-            'message' => 'Updated floor successfully',
-            'data' => $floor,
+            'message' => 'Updated teacher course successfully',
+            'data' => $teacherCourse,
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Floors $floor)
+    public function destroy(TeacherCourses $teacherCourse)
     {
-        $floor->delete();
+        $teacherCourse->delete();
 
         return response()->json([
-            'message' => 'Delete floor successfully',
+            'message' => 'Delete teacher course successfully',
         ], 200);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payrolls;
 use Illuminate\Http\Request;
 
 class PayrollController extends Controller
@@ -11,7 +12,12 @@ class PayrollController extends Controller
      */
     public function index()
     {
-        //
+        $payrolls = Payrolls::with('teachers')->get();
+
+        return response()->json([
+            'message' => 'Get all payrolls successfully',
+            'data' => $payrolls,
+        ], 200);
     }
 
     /**
@@ -27,15 +33,36 @@ class PayrollController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'base_salary' => 'required|numeric',
+            'bonus' => 'nullable|numeric',
+            'deduction' => 'nullable|numeric',
+            'net_salary' => 'required|numeric',
+            'pay_date' => 'required|date',
+            'pay_period_start' => 'required|date',
+            'pay_period_end' => 'required|date|after_or_equal:pay_period_start',
+            'teacher_id' => 'required|integer',
+        ]);
+
+        $payroll = Payrolls::create($validated);
+
+        return response()->json([
+            'message' => 'Created payroll successfully',
+            'data' => $payroll,
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Payrolls $payroll)
     {
-        //
+        $payroll->load('teachers');
+
+        return response()->json([
+            'message' => 'Get payroll by id successfully',
+            'data' => $payroll,
+        ], 200);
     }
 
     /**
@@ -49,16 +76,36 @@ class PayrollController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Payrolls $payroll)
     {
-        //
+        $validated = $request->validate([
+            'base_salary' => 'required|numeric',
+            'bonus' => 'nullable|numeric',
+            'deduction' => 'nullable|numeric',
+            'net_salary' => 'required|numeric',
+            'pay_date' => 'required|date',
+            'pay_period_start' => 'required|date',
+            'pay_period_end' => 'required|date|after_or_equal:pay_period_start',
+            'teacher_id' => 'required|integer',
+        ]);
+
+        $payroll->update($validated);
+
+        return response()->json([
+            'message' => 'Updated payroll successfully',
+            'data' => $payroll,
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Payrolls $payroll)
     {
-        //
+        $payroll->delete();
+
+        return response()->json([
+            'message' => 'Delete payroll successfully',
+        ], 200);
     }
 }
