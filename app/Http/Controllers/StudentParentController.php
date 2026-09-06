@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Enrollments;
+use App\Models\StudentParents;
 use Illuminate\Http\Request;
 
-class EnrollmentController extends Controller
+class StudentParentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $enrollments = Enrollments::all();
+        $studentParents = StudentParents::all();
 
         return response()->json([
-            'message' => 'Get all enrollments successfully',
-            'data' => $enrollments,
+            'message' => 'Get all student parents successfully',
+            'data' => $studentParents,
         ], 200);
     }
 
@@ -34,28 +34,28 @@ class EnrollmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'enrollment_date' => 'required|date',
-            'status' => 'required|string',
+            'relation' => 'required|string|max:50',
+            'is_primary' => 'required|boolean',
             'student_id' => 'required|integer',
-            'course_id' => 'required|integer',
+            'parent_id' => 'required|integer',
         ]);
 
-        $enrollment = Enrollments::create($validated);
+        $studentParent = StudentParents::create($validated);
 
         return response()->json([
-            'message' => 'Created enrollment successfully',
-            'data' => $enrollment,
+            'message' => 'Created student parent successfully',
+            'data' => $studentParent,
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Enrollments $enrollment)
+    public function show(StudentParents $studentParent)
     {
         return response()->json([
-            'message' => 'Get enrollment by id successfully',
-            'data' => $enrollment,
+            'message' => 'Get student parent by id successfully',
+            'data' => $studentParent,
         ], 200);
     }
 
@@ -70,32 +70,32 @@ class EnrollmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Enrollments $enrollment)
+    public function update(Request $request, StudentParents $studentParent)
     {
         $validated = $request->validate([
-            'enrollment_date' => 'required|date',
-            'status' => 'required|string',
+            'relation' => 'required|string|max:50',
+            'is_primary' => 'required|boolean',
             'student_id' => 'required|integer',
-            'course_id' => 'required|integer',
+            'parent_id' => 'required|integer',
         ]);
 
-        $enrollment->update($validated);
+        $studentParent->update($validated);
 
         return response()->json([
-            'message' => 'Updated enrollment successfully',
-            'data' => $enrollment,
+            'message' => 'Updated student parent successfully',
+            'data' => $studentParent,
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Enrollments $enrollment)
+    public function destroy(StudentParents $studentParent)
     {
-        $enrollment->delete();
+        $studentParent->delete();
 
         return response()->json([
-            'message' => 'Delete enrollment successfully',
+            'message' => 'Delete student parent successfully',
         ], 200);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Results;
 use Illuminate\Http\Request;
 
 class ResultController extends Controller
@@ -11,7 +12,12 @@ class ResultController extends Controller
      */
     public function index()
     {
-        //
+        $results = Results::all();
+
+        return response()->json([
+            'message' => 'Get all results successfully',
+            'data' => $results,
+        ], 200);
     }
 
     /**
@@ -27,15 +33,30 @@ class ResultController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'score' => 'required|numeric',
+            'grade' => 'required|string|max:10',
+            'enrollment_id' => 'required|integer',
+            'exam_id' => 'required|integer',
+        ]);
+
+        $result = Results::create($validated);
+
+        return response()->json([
+            'message' => 'Created result successfully',
+            'data' => $result,
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Results $result)
     {
-        //
+        return response()->json([
+            'message' => 'Get result by id successfully',
+            'data' => $result,
+        ], 200);
     }
 
     /**
@@ -49,16 +70,32 @@ class ResultController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Results $result)
     {
-        //
+        $validated = $request->validate([
+            'score' => 'required|numeric',
+            'grade' => 'required|string|max:10',
+            'enrollment_id' => 'required|integer',
+            'exam_id' => 'required|integer',
+        ]);
+
+        $result->update($validated);
+
+        return response()->json([
+            'message' => 'Updated result successfully',
+            'data' => $result,
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Results $result)
     {
-        //
+        $result->delete();
+
+        return response()->json([
+            'message' => 'Delete result successfully',
+        ], 200);
     }
 }
