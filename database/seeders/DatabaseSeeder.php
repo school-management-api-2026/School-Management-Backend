@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'siadmin',
             'email' => 'siadmin@gmail.com',
             'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
-            'phone' => '1234556667888',
+            'phone' => '123455',
             'role_id' => 5
         ]);
     }

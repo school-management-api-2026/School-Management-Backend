@@ -12,17 +12,17 @@ class BookLoans extends Model
         'due_date',
         'loan_date',
         'return_date',
-        'student_id',
-        'book_id',
         'user_id',
+        'book_copy_id',
+        'library_staff_id',
     ];
 
     public function student() {
-        return $this->belongsTo(Students::class, 'student_id');
+        return $this->belongsTo(User::class, 'library_staff_id');
     }
 
     public function book() {
-        return $this->belongsTo(Books::class, 'book_id');
+        return $this->belongsTo(BookCopies::class, 'book_copy_id');
     }
 
     public function user() {

@@ -11,7 +11,7 @@ class Schedules extends Model
     protected $fillable = [
         'day_of_week',
         'time_start',
-        'time_end',
+        'time_out',
         'teacher_course_id',
         'room_id',
     ];

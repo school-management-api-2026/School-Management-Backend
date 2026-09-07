@@ -16,7 +16,7 @@ class ParentController extends Controller
      */
     public function index()
     {
-        $parents = Parents::with('users')->get();
+        $parents = Parents::with('user')->get();
 
         return response()->json([
             'message' => 'Get all parents successfully',
@@ -94,7 +94,7 @@ class ParentController extends Controller
      */
     public function show(Parents $parent)
     {
-        $parent->load('users');
+        $parent->load('user');
 
         return response()->json([
             'message' => 'Get parent by id successfully',

@@ -4,7 +4,7 @@
 
 A Laravel 10 REST API for managing a school system: users, students, teachers, parents, academic courses, exams, enrollments, finances, library, and facilities.
 
-**Status:** Early/intermediate development. Core auth, user, student, teacher, role, and subject CRUDs are functional. Many controllers and routes are not yet wired up.
+**Status:** Intermediate development. Core auth and most CRUD controllers are implemented and wired. Library module controllers (Author, Book, BookCopy, BookLoan, BookAuthor, Fine) remain stubs with empty method bodies.
 
 ---
 
@@ -29,7 +29,7 @@ app/
 ├── Console/Kernel.php
 ├── Exceptions/Handler.php
 ├── Http/
-│   ├── Controllers/          # 26 controllers (6 implemented, 20 stubs)
+│   ├── Controllers/          # 28 controllers (22 implemented, 6 stubs)
 │   ├── Middleware/CheckRole.php  # Custom RBAC middleware
 │   └── Requests/StoreUserRequest.php  # Form validation
 ├── Models/                   # 26 Eloquent models
@@ -37,12 +37,12 @@ app/
 └── Services/CloudinaryService.php  # Image upload/delete helper
 
 database/
-├── migrations/               # 32 migration files
+├── migrations/               # 29 migration files
 ├── factories/UserFactory.php
 └── seeders/DatabaseSeeder.php  # Roles + admin seed data
 
 routes/
-├── api.php                   # API routes (only 5 resources registered)
+├── api.php                   # API routes (19 resources registered)
 ├── web.php
 ├── channels.php
 └── console.php
@@ -133,21 +133,35 @@ Invoice hasMany Payments
 
 ## API Routes (Currently Registered)
 
-| Method | URI              | Controller        | Auth       |
-| ------ | ---------------- | ----------------- | ---------- |
-| POST   | /api/register    | AuthController    | Public     |
-| POST   | /api/login       | AuthController    | Public     |
-| POST   | /api/logout      | AuthController    | Sanctum    |
-| GET    | /api/user        | Closure           | Sanctum    |
-| *      | /api/user        | UserController    | Public*    |
-| *      | /api/role        | RoleController    | role:1     |
-| *      | /api/student     | StudentController | role:1     |
-| *      | /api/teacher     | TeacherController | role:1     |
-| *      | /api/subject     | SubjectController | role:1     |
+All routes use `middleware('auth:sanctum')`. Admin-only resources use `middleware('role:1')`.
 
-*role:1 = Admin only via CheckRole middleware*
+| Method | URI              | Controller             | Auth       | Status    |
+| ------ | ---------------- | ---------------------- | ---------- | --------- |
+| POST   | /api/register    | AuthController         | Public     | Implemented |
+| POST   | /api/login       | AuthController         | Public     | Implemented |
+| POST   | /api/logout      | AuthController         | Sanctum    | Implemented |
+| *      | /api/user        | UserController         | role:1     | Implemented |
+| *      | /api/role        | RoleController         | role:1     | Implemented |
+| *      | /api/student     | StudentController      | role:1     | Implemented |
+| *      | /api/teacher     | TeacherController      | role:1     | Implemented |
+| *      | /api/subject     | SubjectController      | role:1     | Implemented |
+| *      | /api/parent      | ParentController       | role:1     | Implemented |
+| *      | /api/course      | CourseController       | role:1     | Implemented |
+| *      | /api/enrollment  | EnrollmentController   | role:1     | Implemented |
+| *      | /api/attendance  | AttendanceController   | role:1     | Implemented |
+| *      | /api/exam        | ExamController         | role:1     | Implemented |
+| *      | /api/result      | ResultController       | role:1     | Implemented |
+| *      | /api/invoice     | InvoiceController      | role:1     | Implemented |
+| *      | /api/payment     | PaymentController      | role:1     | Implemented |
+| *      | /api/payroll     | PayrollController      | role:1     | Implemented |
+| *      | /api/building    | BuildingController     | role:1     | Implemented |
+| *      | /api/floor       | FloorController        | role:1     | Implemented |
+| *      | /api/room        | RoomController         | role:1     | Implemented |
+| *      | /api/schedule    | ScheduleController     | role:1     | Implemented |
 
-**Not yet wired:** Course, Enrollment, Attendance, Exam, Result, Invoice, Payment, Payroll, Book, BookLoan, BookCopy, BookAuthor, Author, Building, Floor, Room, Schedule, Parent, Fine controllers.
+`* = apiResource (GET /, GET /{id}, POST, PUT /{id}, DELETE /{id})`
+
+**Not yet wired:** Author, Book, BookCopy, BookLoan, BookAuthor, Fine, TeacherCourse, StudentParent controllers (implemented but not registered in routes).
 
 ---
 
@@ -189,11 +203,10 @@ Invoice hasMany Payments
    - `schedules` model uses `time_end` but migration uses `time_out`; model has `day_of_week` but migration doesn't
    - `book_loans` model references `student_id`, `book_id` but migration uses `book_copy_id`, `user_id`, `library_staff_id`
    - `Authors` model has self-referencing `authors()` method (bug)
-2. **Routes incomplete** — 20+ controllers exist but aren't registered
-3. **Stub controllers** — most controllers have empty method bodies
-4. **No application tests** written yet (only default example tests)
-5. **phpunit.xml** — SQLite in-memory DB is commented out; tests need PostgreSQL
-6. **`.env`** with real credentials (including Cloudinary URL) is in the repository
+2. **Library module stubs** — Author, Book, BookCopy, BookLoan, BookAuthor, Fine controllers have empty method bodies
+3. **No application tests** written yet (only default example tests)
+4. **phpunit.xml** — SQLite in-memory DB is commented out; tests need PostgreSQL
+5. **`.env`** with real credentials (including Cloudinary URL) is in the repository
 
 ---
 
@@ -223,7 +236,7 @@ php artisan serve
 ## Git
 
 - **Main branches:** `main`, `dev`
-- **Active branch:** `sinh-dev` (currently mid-merge)
+- **Active branch:** `sinh-dev`
 - **Remote:** `origin` with `develop` branch
 
 ---

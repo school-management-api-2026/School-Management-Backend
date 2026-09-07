@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('floors', function (Blueprint $table) {
             $table->id();
-            $table->string('floor_nummber',50);
+            $table->string('floor_number',50);
             $table->foreignId('building_id')->constrained('buildings')->cascadeOnDelete();
             $table->timestamps();
         });

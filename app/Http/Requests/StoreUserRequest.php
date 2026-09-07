@@ -49,7 +49,7 @@ class StoreUserRequest extends FormRequest
             'name' => 'required|string|max:255',
             'username' => 'nullable|string|max:150|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'nullable|string|min:6',
             'phone' => 'nullable|string|unique:users,phone',
             'gender' => 'nullable|string|max:30',
             'date_of_birth' => 'nullable|date',
