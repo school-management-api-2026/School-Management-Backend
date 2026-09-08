@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'sinhadmin',
             'email' => 'sinhadmin@gmail.com',
             'password' => bcrypt('superadmin'),
-            'phone' => "1234556667",
+            'phone' => "1234556668",
             'role_id' => 2
         ]);
 
@@ -42,17 +42,17 @@ class DatabaseSeeder extends Seeder
             'username' => 'staff',
             'email' => 'staff@gmail.com',
             'password' => bcrypt('staff'),
-            'phone' => "1234556667",
+            'phone' => "1234556669",
             'role_id' => 3
         ]);
 
         // បង្កើត Student User
         User::create([
             'name' => 'sinh',
-            'username' => 'sinhadmin',
+            'username' => 'sinhstudent',
             'email' => 'sinhnaadmin@gmail.com',
             'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
-            'phone' => '1234556667',
+            'phone' => '1234556670',
             'role_id' => 4
         ]);
 

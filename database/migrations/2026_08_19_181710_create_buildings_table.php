@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name',50);
             $table->integer('total_floors');
-            $table->string('address_location')->nullable();
+            $table->string('description')->nullable();
+            $table->enum('status', ['Active', 'Inactive', 'Maintenance'])->default('Active');
             $table->timestamps();
         });
     }

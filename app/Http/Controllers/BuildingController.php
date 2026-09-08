@@ -36,7 +36,8 @@ class BuildingController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'total_floors' => 'required|integer',
-            'description_location' => 'nullable|string',
+            'description' => 'nullable|string', 
+            'status' => 'required',
         ]);
 
         $building = Buildings::create($validated);
@@ -77,8 +78,9 @@ class BuildingController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:150',
-            'total_floors' => 'required|integer', // កែពី rcquired មកជា required
-            'description_location' => 'nullable|string', // កែពី text មកជា string
+            'total_floors' => 'required|integer',
+            'description' => 'nullable|string', 
+            'status' => 'required',
         ]);
 
         $hasChange = false;

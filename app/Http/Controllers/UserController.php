@@ -14,13 +14,17 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $users = User::with('role')->get();
-        return response()->json([
-            'message' => 'Get all users',
-            'data' => $users,
-        ], 200);
-    }
+{
+    $users = User::with('role')->get()->map(function ($user) {
+        $user->role_name = $user->role->name ?? '—';
+        return $user;
+    });
+
+    return response()->json([
+        'message' => 'Get all users',
+        'data' => $users,
+    ], 200);
+}
 
     /**
      * Show the form for creating a new resource.
@@ -62,7 +66,9 @@ class UserController extends Controller
                 );
             }
 
-            $validated['password'] = Hash::make($validated['password']);
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
 
             $user = User::create($validated);
 

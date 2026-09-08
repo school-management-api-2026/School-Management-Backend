@@ -11,7 +11,8 @@ class Buildings extends Model
     protected $fillable = [
         'name',
         'total_floors',
-        'address_location',
+        'description',
+        'status'
     ];
 
     public function floors() {

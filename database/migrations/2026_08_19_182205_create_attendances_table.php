@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->date('attendance_date');
+            $table->date('date');
             $table->enum('status',['late','persent','permission','absent'])->default('persent');
             $table->time('time_in');
             $table->time('time_out');

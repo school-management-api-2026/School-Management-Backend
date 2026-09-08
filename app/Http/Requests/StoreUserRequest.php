@@ -37,7 +37,7 @@ class StoreUserRequest extends FormRequest
                 'phone' => ['nullable', 'string', Rule::unique('users', 'phone')->ignore($userId)],
                 'gender' => 'nullable|string|max:30',
                 'date_of_birth' => 'nullable|date',
-                'image' => 'nullable|file|max:2048|mimes:png,webp,jpg,jpeg,svg',
+                'image' => 'nullable|string',
                 'role_id' => 'sometimes|required|exists:roles,id',
                 
             ];
@@ -53,9 +53,8 @@ class StoreUserRequest extends FormRequest
             'phone' => 'nullable|string|unique:users,phone',
             'gender' => 'nullable|string|max:30',
             'date_of_birth' => 'nullable|date',
-            'image' => 'nullable|file|max:2048|mimes:png,webp,jpg,jpeg,svg',
+            'image' => 'nullable|string',
             'role_id' => 'required|exists:roles,id',
-        
         ];
     }
 }
