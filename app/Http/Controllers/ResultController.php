@@ -12,7 +12,7 @@ class ResultController extends Controller
      */
     public function index()
     {
-        $results = Results::all();
+        $results = Results::with('enrollment.student.user', 'enrollment.course.subject', 'exam.subject')->get();
 
         return response()->json([
             'message' => 'Get all results successfully',
@@ -53,6 +53,8 @@ class ResultController extends Controller
      */
     public function show(Results $result)
     {
+        $result->load('enrollment.student.user', 'enrollment.course.subject', 'exam.subject');
+
         return response()->json([
             'message' => 'Get result by id successfully',
             'data' => $result,

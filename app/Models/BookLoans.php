@@ -12,10 +12,23 @@ class BookLoans extends Model
         'due_date',
         'loan_date',
         'return_date',
+        'status',
         'user_id',
         'book_copy_id',
         'library_staff_id',
     ];
+
+    public function borrower() {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function bookCopy() {
+        return $this->belongsTo(BookCopies::class, 'book_copy_id');
+    }
+
+    public function staff() {
+        return $this->belongsTo(User::class, 'library_staff_id');
+    }
 
     public function student() {
         return $this->belongsTo(User::class, 'library_staff_id');

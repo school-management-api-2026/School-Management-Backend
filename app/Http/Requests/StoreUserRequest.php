@@ -23,6 +23,9 @@ class StoreUserRequest extends FormRequest
             } elseif ($this->route('teacher')) {
                 $teacher = $this->route('teacher');
                 $userId = is_object($teacher) ? $teacher->user_id : $teacher;
+            } elseif ($this->route('parent')) {
+                $parent = $this->route('parent');
+                $userId = is_object($parent) ? $parent->user_id : $parent;
             } elseif ($this->route('user')) {
                 $user = $this->route('user');
                 $userId = is_object($user) ? $user->id : $user;

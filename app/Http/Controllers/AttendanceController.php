@@ -12,7 +12,7 @@ class AttendanceController extends Controller
      */
     public function index()
     {
-        $attendances = Attendances::all();
+        $attendances = Attendances::with('user', 'teacher_course.course.subject', 'teacher_course.teacher.user')->get();
 
         return response()->json([
             'message' => 'Get all attendances successfully',
@@ -39,9 +39,11 @@ class AttendanceController extends Controller
             'time_out' => 'nullable',
             'status' => 'required|string|max:30',
             'user_id' => 'required|integer',
+            'teacher_course_id' => 'nullable|integer',
         ]);
 
         $attendance = Attendances::create($validated);
+        $attendance->load('user', 'teacher_course.course.subject', 'teacher_course.teacher.user');
 
         return response()->json([
             'message' => 'Created attendance successfully',
@@ -54,6 +56,8 @@ class AttendanceController extends Controller
      */
     public function show(Attendances $attendance)
     {
+        $attendance->load('user', 'teacher_course.course.subject', 'teacher_course.teacher.user');
+
         return response()->json([
             'message' => 'Get attendance by id successfully',
             'data' => $attendance,
@@ -79,9 +83,11 @@ class AttendanceController extends Controller
             'time_out' => 'nullable',
             'status' => 'required|string|max:30',
             'user_id' => 'required|integer',
+            'teacher_course_id' => 'nullable|integer',
         ]);
 
         $attendance->update($validated);
+        $attendance->load('user', 'teacher_course.course.subject', 'teacher_course.teacher.user');
 
         return response()->json([
             'message' => 'Updated attendance successfully',

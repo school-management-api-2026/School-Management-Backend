@@ -4,7 +4,7 @@
 
 A Laravel 10 REST API for managing a school system: users, students, teachers, parents, academic courses, exams, enrollments, finances, library, and facilities.
 
-**Status:** Intermediate development. Core auth and most CRUD controllers are implemented and wired. Library module controllers (Author, Book, BookCopy, BookLoan, BookAuthor, Fine) remain stubs with empty method bodies. TeacherCourse and StudentParent controllers are implemented but not yet wired into routes.
+**Status:** Intermediate development. Core auth and most CRUD controllers are implemented and wired. Library module: Author, Book, BookCopy and BookLoan are implemented and wired; BookAuthor and Fine remain stubs with empty method bodies. TeacherCourse is implemented and wired; StudentParent is implemented but not yet wired into routes.
 
 ---
 
@@ -29,7 +29,7 @@ app/
 ├── Console/Kernel.php
 ├── Exceptions/Handler.php
 ├── Http/
-│   ├── Controllers/          # 28 controllers (22 implemented, 6 stubs)
+│   ├── Controllers/          # 28 controllers (26 implemented, 2 stubs)
 │   ├── Kernel.php            # Middleware alias `role` → CheckRole
 │   ├── Middleware/CheckRole.php  # Custom RBAC middleware
 │   └── Requests/StoreUserRequest.php  # Form validation
@@ -38,12 +38,12 @@ app/
 └── Services/CloudinaryService.php  # Image upload/delete helper
 
 database/
-├── migrations/               # 29 migration files
+├── migrations/               # 30 migration files
 ├── factories/UserFactory.php
 └── seeders/DatabaseSeeder.php  # Roles + admin seed data
 
 routes/
-├── api.php                   # API routes (18 resources registered)
+├── api.php                   # API routes (22 resources registered)
 ├── web.php
 ├── channels.php
 └── console.php
@@ -74,8 +74,8 @@ tests/
 | courses           | unit_price, promotion, capacity, start_date, end_date, subject_id (FK) |
 | student_parents   | relation, is_primary, student_id, parent_id (pivot)      |
 | teacher_courses   | teacher_id, course_id (pivot)                            |
-| schedules         | time_start, time_out, room_id, teacher_course_id         |
-| attendances       | attendance_date, status (late/persent/permission/absent), time_in, time_out |
+| schedules         | day_of_week, time_start, time_out, room_id, teacher_course_id |
+| attendances       | date, time_in, time_out, status (late/persent/permission/absent), user_id, teacher_course_id (FK) — user_id + nullable time cols + teacher_course_id added via migrations |
 | enrollments       | enrollment_date, status, student_id, course_id           |
 
 ### Financials
@@ -90,6 +90,11 @@ tests/
 | ------- | -------------------------------------- |
 | exams   | exam_date, exam_type, subject_id, teacher_id, course_id |
 | results | score, grade, enrollment_id, exam_id   |
+
+### System
+| Table    | Key Columns                              |
+| -------- | ---------------------------------------- |
+| settings | key (unique), value                      |
 
 ### Library
 | Table        | Key Columns                                              |
@@ -140,6 +145,10 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 | POST   | /api/register    | AuthController         | Public     | Implemented |
 | POST   | /api/login       | AuthController         | Public     | Implemented |
 | POST   | /api/logout      | AuthController         | Sanctum    | Implemented |
+| GET    | /api/me          | AuthController (closure) | Sanctum  | Implemented |
+| PUT    | /api/profile     | AuthController         | Sanctum     | Implemented |
+| PUT    | /api/profile/password | AuthController    | Sanctum     | Implemented |
+| POST   | /api/upload      | UploadController       | Sanctum     | Implemented |
 | *      | /api/user        | UserController         | **none** (bug, see Known Issues) | Implemented |
 | *      | /api/role        | RoleController         | role:1     | Implemented |
 | *      | /api/student     | StudentController      | role:1     | Implemented |
@@ -158,11 +167,19 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 | *      | /api/room        | RoomController         | role:1     | Implemented |
 | *      | /api/schedule    | ScheduleController     | role:1     | Implemented |
 | *      | /api/attendance  | AttendanceController   | role:1     | Implemented |
+| *      | /api/teacher-course | TeacherCourseController | role:1  | Implemented |
+| *      | /api/author      | AuthorController       | role:1     | Implemented |
+| *      | /api/book        | BookController         | role:1     | Implemented |
+| *      | /api/book-copy   | BookCopyController     | role:1     | Implemented |
+| *      | /api/book-loan   | BookLoanController     | role:1     | Implemented |
+
+| GET    | /api/dashboard/summary | DashboardController | role:1     | Implemented |
+| GET/POST | /api/setting | SettingController | role:1 | Implemented |
 
 `* = apiResource (GET /, GET /{id}, POST, PUT /{id}, DELETE /{id})`
 
-**Not yet wired (implemented but not registered in routes):** TeacherCourse, StudentParent.
-**Not yet wired (stubs):** Author, Book, BookCopy, BookLoan, BookAuthor, Fine.
+**Not yet wired (implemented but not registered in routes):** StudentParent.
+**Not yet wired (stubs):** BookAuthor, Fine.
 
 ---
 
@@ -185,8 +202,9 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 5. **Model naming:** Plural — `Students`, `Teachers`, `Courses`, `Books`
 6. **Form validation:** Via `StoreUserRequest` with `sometimes` and `Rule::unique()->ignore()`
 7. **Eager loading:** `Students::with('user.role')`
-8. **Route model binding:** Controllers use type-hinted models (e.g., `Students $student`)
+8. **Route model binding:** Controllers use type-hinted models (e.g., `Students $student`) — but newer controllers (Author, Book, BookCopy, BookLoan) use `string $id` + `findOrFail`
 9. **Comments:** Some Khmer language comments present in code
+10. **Response eager loading:** Controllers `with()` the relations the frontend needs (e.g. `borrower`, `book_copy.book`, `staff`); relation keys serialize as snake_case in JSON
 
 ---
 
@@ -194,19 +212,27 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 
 - **Roles:** Admin(1), Teacher(2), Library_staff(3), Student(4), Parent(5)
 - **Users:** superadmin (Admin), sinh (Teacher), staff (Library_staff), sinh (Student), si (Parent)
+- **Seeded via API (dev data, not in DatabaseSeeder):**
+  - Teachers 2/4/5/6, courses 1/2/5/6 (Mathematics, Khmer Literature, Biology, English), subjects 1/2/8/10
+  - Enrollments (students 2/3), schedules (Mon/Wed/Tue, Mon-Fri blocks), rooms 101/201/CH-301/PH-302/301/READ-1/102
+  - Exams (Math Final, Khmer Midterm, Biology Quiz, English Final), results, invoices, payments
+  - Library: authors 2-7, books 1-4, book copies BC-001..007, book loans (borrowed/returned/overdue)
+  - Facilities: buildings 1-4 (Main, Voluptatibus officii, Science, Library) with floors 1-16
+
+**Note:** Live data is frequently deleted/re-added externally (course/enrollment/author ids have shifted). Verify current ids before referencing them in code or seeds.
 
 ---
 
 ## Known Issues
 
 1. **Migration/model mismatches:**
-   - `attendances` model has `user_id` in fillable and a `user()` relation, but migration lacks a `user_id` column
-   - `schedules` model includes `day_of_week` in fillable but migration doesn't have that column
-   - `Books` model has a `book_loans()` relation using `book_id`, but `book_loans` table has no `book_id` column
-   - `BookLoans` model has a misnamed `student()` method that actually belongsTo `User` via `library_staff_id`
-   - `Authors` model has self-referencing `authors()` method (bug)
+   - `Books` model has a `book_loans()` relation using `book_id`, but `book_loans` table has no `book_id` column (loans reference `book_copies.book_id`, not books directly)
+   - `BookLoans` model has misnamed `student()` and `book()`/`user()` methods (`student()` actually belongsTo `User` via `library_staff_id`); proper relations `borrower()`/`bookCopy()`/`staff()` exist and should be preferred
+   - `Authors` model has self-referencing `authors()` method (bug); the working pivot relation is `book_authors()`
+   - `Fine` verb vs `Fines` model naming — `BookLoans::fines()` references `fines::class` directly
+   - `schedule`/`attendance` mismatches were fixed via migrations: `day_of_week` added to `schedules`, `user_id` added to `attendances`, and `attendances.time_in`/`time_out` made nullable
 2. **Route security gap** — `/user` apiResource is registered **without** `auth:sanctum` / `role:1` middleware (only a comment says "only admin"); any unauthenticated request can CRUD users
-3. **Library module stubs** — Author, Book, BookCopy, BookLoan, BookAuthor, Fine controllers have empty method bodies
+3. **Library module stubs** — BookAuthor and Fine controllers still have empty method bodies (Book, BookCopy, BookLoan, Author are implemented)
 4. **No application tests** written yet (only default example tests)
 5. **phpunit.xml** — SQLite in-memory DB is commented out; tests need PostgreSQL
 6. **`.env`** with real credentials (including Cloudinary URL) is in the repository
@@ -247,8 +273,8 @@ php artisan serve
 ## When Making Changes
 
 - Follow existing controller patterns (JSON response format, DB transactions for multi-table ops)
-- Check model `$fillable` and `$casts` before adding fields
-- Register new routes in `routes/api.php` with appropriate `role:` middleware
+- Check model `$fillable` and `$casts` before adding fields (e.g. `BookLoans` was missing `status` until it was added)
+- Register new routes in `routes/api.php` with appropriate `role:` middleware — remember to `use App\Http\Controllers\X;` at the top, otherwise the route silently fails with "Target class [XController] does not exist"
 - Use existing `CloudinaryService` for image uploads
 - Use `StoreUserRequest` for user-related validation
 - Be aware of existing migration/model mismatches — validate against the migration, not just the model

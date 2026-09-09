@@ -58,7 +58,9 @@ class TeacherController extends Controller
                 );
             }
 
-            $validated['password'] = Hash::make($validated['password']);
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
 
             $user = User::create($validated);
 
@@ -117,6 +119,11 @@ class TeacherController extends Controller
             if ($request->hasFile('image')) {
                 CloudinaryService::delete($user->image, 'teachers');
                 $userData['image'] = CloudinaryService::upload($request->file('image'), 'teachers');
+            } elseif ($request->filled('image')) {
+                if ($user->image && $user->image !== $validated['image']) {
+                    CloudinaryService::delete($user->image, 'teachers');
+                }
+                $userData['image'] = $validated['image'];
             }
 
             if (!empty($validated['password'])) {

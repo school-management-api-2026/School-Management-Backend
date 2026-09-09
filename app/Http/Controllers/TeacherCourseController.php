@@ -12,7 +12,7 @@ class TeacherCourseController extends Controller
      */
     public function index()
     {
-        $teacherCourses = TeacherCourses::all();
+        $teacherCourses = TeacherCourses::with('teacher.user', 'course.subject')->get();
 
         return response()->json([
             'message' => 'Get all teacher courses successfully',

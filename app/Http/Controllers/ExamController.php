@@ -12,7 +12,7 @@ class ExamController extends Controller
      */
     public function index()
     {
-        $exams = Exams::all();
+        $exams = Exams::with('subject', 'teacher.user', 'course.subject')->get();
 
         return response()->json([
             'message' => 'Get all exams successfully',
@@ -54,6 +54,8 @@ class ExamController extends Controller
      */
     public function show(Exams $exam)
     {
+        $exam->load('subject', 'teacher.user', 'course.subject');
+
         return response()->json([
             'message' => 'Get exam by id successfully',
             'data' => $exam,

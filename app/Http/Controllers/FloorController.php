@@ -12,7 +12,7 @@ class FloorController extends Controller
      */
     public function index()
     {
-        $floors = Floors::all();
+        $floors = Floors::with('building')->get();
 
         return response()->json([
             'message' => 'Get all floors successfully',
@@ -51,6 +51,8 @@ class FloorController extends Controller
      */
     public function show(Floors $floor)
     {
+        $floor->load('building');
+
         return response()->json([
             'message' => 'Get floor by id successfully',
             'data' => $floor,

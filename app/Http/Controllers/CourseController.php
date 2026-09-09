@@ -12,7 +12,7 @@ class CourseController extends Controller
      */
     public function index()
     {
-        $courses = Courses::all();
+        $courses = Courses::with('subject')->get();
 
         return response()->json([
             'message' => 'Get all courses successfully',
@@ -55,7 +55,9 @@ class CourseController extends Controller
      */
     public function show(Courses $course)
     {
-        return response()->json([
+        $course->load('subject');
+
+            return response()->json([
             'message' => 'Get course by id successfully',
             'data' => $course,
         ], 200);

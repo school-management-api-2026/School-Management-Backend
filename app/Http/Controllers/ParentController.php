@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
 use App\Models\Parents;
 use App\Models\User;
 use App\Services\CloudinaryService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -35,7 +35,7 @@ class ParentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
 
@@ -65,7 +65,9 @@ class ParentController extends Controller
                 );
             }
 
-            $validated['password'] = Hash::make($validated['password']);
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
 
             $user = User::create($validated);
 
@@ -113,7 +115,7 @@ class ParentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Parents $parent)
+    public function update(StoreUserRequest $request, Parents $parent)
     {
         $user = $parent->user;
         $validated = $request->validated();
@@ -130,6 +132,11 @@ class ParentController extends Controller
             if ($request->hasFile('image')) {
                 CloudinaryService::delete($user->image, 'parents');
                 $userData['image'] = CloudinaryService::upload($request->file('image'), 'parents');
+            } elseif ($request->filled('image')) {
+                if ($user->image && $user->image !== $validated['image']) {
+                    CloudinaryService::delete($user->image, 'parents');
+                }
+                $userData['image'] = $validated['image'];
             }
 
             if (!empty($validated['password'])) {

@@ -12,7 +12,7 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        $schedules = Schedules::all();
+        $schedules = Schedules::with('room', 'teacher_course.teacher.user', 'teacher_course.course.subject')->get();
 
         return response()->json([
             'message' => 'Get all schedules successfully',
@@ -36,7 +36,7 @@ class ScheduleController extends Controller
         $validated = $request->validate([
             'day_of_week' => 'required|string|max:20',
             'time_start' => 'required',
-            'time_end' => 'required',
+            'time_out' => 'required',
             'room_id' => 'required|integer',
             'teacher_course_id' => 'required|integer',
         ]);
@@ -76,7 +76,7 @@ class ScheduleController extends Controller
         $validated = $request->validate([
             'day_of_week' => 'required|string|max:20',
             'time_start' => 'required',
-            'time_end' => 'required',
+            'time_out' => 'required',
             'room_id' => 'required|integer',
             'teacher_course_id' => 'required|integer',
         ]);

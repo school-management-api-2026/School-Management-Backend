@@ -12,7 +12,7 @@ class RoomController extends Controller
      */
     public function index()
     {
-        $rooms = Rooms::all();
+        $rooms = Rooms::with('floor.building')->get();
 
         return response()->json([
             'message' => 'Get all rooms successfully',
@@ -34,7 +34,6 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
             'room_number' => 'required|string|max:50',
             'room_type' => 'required|string|max:50',
             'capacity' => 'required|integer',
@@ -54,6 +53,8 @@ class RoomController extends Controller
      */
     public function show(Rooms $room)
     {
+        $room->load('floor.building');
+
         return response()->json([
             'message' => 'Get room by id successfully',
             'data' => $room,
@@ -74,7 +75,6 @@ class RoomController extends Controller
     public function update(Request $request, Rooms $room)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
             'room_number' => 'required|string|max:50',
             'room_type' => 'required|string|max:50',
             'capacity' => 'required|integer',

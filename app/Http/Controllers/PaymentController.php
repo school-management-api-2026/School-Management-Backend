@@ -12,7 +12,7 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $payments = Payments::all();
+        $payments = Payments::with('invoice.enrollment.student.user', 'invoice.enrollment.course.subject')->get();
 
         return response()->json([
             'message' => 'Get all payments successfully',
@@ -54,7 +54,7 @@ class PaymentController extends Controller
      */
     public function show(Payments $payment)
     {
-        $payment->load('invoice');
+        $payment->load('invoice.enrollment.student.user', 'invoice.enrollment.course.subject');
 
         return response()->json([
             'message' => 'Get payment by id successfully',

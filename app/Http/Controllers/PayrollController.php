@@ -12,7 +12,7 @@ class PayrollController extends Controller
      */
     public function index()
     {
-        $payrolls = Payrolls::with('teachers')->get();
+        $payrolls = Payrolls::with('teacher.user')->get();
 
         return response()->json([
             'message' => 'Get all payrolls successfully',
@@ -57,7 +57,7 @@ class PayrollController extends Controller
      */
     public function show(Payrolls $payroll)
     {
-        $payroll->load('teachers');
+        $payroll->load('teacher.user');
 
         return response()->json([
             'message' => 'Get payroll by id successfully',

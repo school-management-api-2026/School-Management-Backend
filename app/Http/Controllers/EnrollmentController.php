@@ -12,7 +12,7 @@ class EnrollmentController extends Controller
      */
     public function index()
     {
-        $enrollments = Enrollments::all();
+        $enrollments = Enrollments::with('student.user', 'course.subject')->get();
 
         return response()->json([
             'message' => 'Get all enrollments successfully',
@@ -53,6 +53,8 @@ class EnrollmentController extends Controller
      */
     public function show(Enrollments $enrollment)
     {
+        $enrollment->load('student.user', 'course.subject');
+
         return response()->json([
             'message' => 'Get enrollment by id successfully',
             'data' => $enrollment,

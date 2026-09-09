@@ -14,9 +14,14 @@ class Attendances extends Model
         'time_out',
         'status',
         'user_id',
+        'teacher_course_id',
     ];
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function teacher_course() {
+        return $this->belongsTo(TeacherCourses::class, 'teacher_course_id');
     }
 }
