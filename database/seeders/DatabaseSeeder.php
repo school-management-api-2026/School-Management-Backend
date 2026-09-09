@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash; // <--- បន្ថែម Facade នេះ
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Roles;
 
@@ -12,57 +12,63 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // បង្កើត Roles
-        Roles::create(['name' => 'Admin']);
-        Roles::create(['name' => 'Teacher']);
-        Roles::create(['name' => 'Library_staff']);
-        Roles::create(['name' => 'Student']);
-        Roles::create(['name' => 'Parent']);
+        Roles::firstOrCreate(['name' => 'Admin']);
+        Roles::firstOrCreate(['name' => 'Teacher']);
+        Roles::firstOrCreate(['name' => 'Library_staff']);
+        Roles::firstOrCreate(['name' => 'Student']);
+        Roles::firstOrCreate(['name' => 'Parent']);
 
         // បង្កើត Admin User
-        User::create([
+        User::firstOrCreate([
+            'email' => 'superadmin@gmail.com',
+        ], [
             'name' => 'superadmin',
             'username' => 'superadmin',
-            'email' => 'superadmin@gmail.com',
-            'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
+            'password' => Hash::make('superadmin'),
             'phone' => '1234556667',
             'role_id' => 1
         ]);
 
-        \App\Models\User::factory()->create([
+        User::firstOrCreate([
+            'email' => 'sinhadmin@gmail.com',
+        ], [
             'name' => 'sinh',
             'username' => 'sinhadmin',
-            'email' => 'sinhadmin@gmail.com',
-            'password' => bcrypt('superadmin'),
+            'password' => Hash::make('superadmin'),
             'phone' => "1234556668",
             'role_id' => 2
         ]);
 
-        \App\Models\User::factory()->create([
+        User::firstOrCreate([
+            'email' => 'staff@gmail.com',
+        ], [
             'name' => 'staff',
             'username' => 'staff',
-            'email' => 'staff@gmail.com',
-            'password' => bcrypt('staff'),
+            'password' => Hash::make('staff'),
             'phone' => "1234556669",
             'role_id' => 3
         ]);
 
-        // បង្កើត Student User
-        User::create([
+        User::firstOrCreate([
+            'email' => 'sinhnaadmin@gmail.com',
+        ], [
             'name' => 'sinh',
             'username' => 'sinhstudent',
-            'email' => 'sinhnaadmin@gmail.com',
-            'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
+            'password' => Hash::make('superadmin'),
             'phone' => '1234556670',
             'role_id' => 4
         ]);
 
-        User::create([
+        User::firstOrCreate([
+            'email' => 'siadmin@gmail.com',
+        ], [
             'name' => 'si',
             'username' => 'siadmin',
-            'email' => 'siadmin@gmail.com',
-            'password' => Hash::make('superadmin'), // <--- ប្រើ Hash::make
+            'password' => Hash::make('superadmin'),
             'phone' => '123455',
             'role_id' => 5
         ]);
+
+        $this->call(SeedSchoolData::class);
     }
 }

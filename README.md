@@ -1,65 +1,201 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# School Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 10 REST API for managing a complete school system: users, students, teachers, parents, academic courses, exams, enrollments, finances, library, and facilities.
 
-## About Laravel
+**Status:** Intermediate development. Core auth and most CRUD controllers are implemented and wired. The library module's `Author`, `Book`, `BookCopy`, and `BookLoan` are implemented and wired; `BookAuthor` and `Fine` remain stubs with empty method bodies. `TeacherCourse` is implemented and wired, while `StudentParent` is implemented but not yet registered in routes.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Component        | Technology                                        |
+| ---------------- | ------------------------------------------------- |
+| Framework        | Laravel 10.10+                                    |
+| Language         | PHP 8.1+                                          |
+| Database         | PostgreSQL 17 (Docker)                            |
+| Authentication   | Laravel Sanctum (API token)                       |
+| Image Uploads    | Cloudinary (`cloudinary-labs/cloudinary-laravel`) |
+| Testing          | PHPUnit 10                                        |
+| Containerization | Docker Compose (PostgreSQL only)                  |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Features
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Authentication & Authorization** — Register / login / logout / profile via Sanctum Bearer tokens, with role-based access control through the `role` middleware.
+- **Core Identity** — Management of users, students, teachers, and parents, with auto-generated user codes (`USR-YYYY-NNN`).
+- **Academic** — Subjects, courses, schedules, attendances, enrollments, and the teacher-course pivot.
+- **Exams & Results** — Exams and result grading linked to enrollments.
+- **Financials** — Invoices, payments, and teacher payrolls.
+- **Library** — Books, book copies, authors, book loans, and fines (partial).
+- **Facilities** — Buildings, floors, and rooms.
+- **System** — Settings key/value store and a dashboard summary endpoint.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Directory Structure
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+app/
+├── Console/Kernel.php
+├── Exceptions/Handler.php
+├── Http/
+│   ├── Controllers/          # 31 controllers (library stubs: BookAuthor, Fine)
+│   ├── Kernel.php            # Middleware alias `role` → CheckRole
+│   ├── Middleware/CheckRole.php  # Custom RBAC middleware
+│   └── Requests/StoreUserRequest.php  # Form validation
+├── Models/                   # 26 Eloquent models
+├── Providers/
+└── Services/CloudinaryService.php  # Image upload/delete helper
 
-### Premium Partners
+database/
+├── migrations/               # 30 migration files
+├── factories/UserFactory.php
+└── seeders/DatabaseSeeder.php  # Roles + admin seed data
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+routes/
+└── api.php                   # API routes
 
-## Contributing
+tests/
+├── Feature/ExampleTest.php
+├── Unit/ExampleTest.php
+└── TestCase.php
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Database Schema
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Core Identity
+| Table    | Key Columns                                                        |
+| -------- | ------------------------------------------------------------------ |
+| roles    | id, name                                                           |
+| users    | code (USR-YYYY-NNN), name, username, email, phone, gender, date_of_birth, image, role_id (FK) |
+| students | user_id (FK → users)                                               |
+| teachers | hire_date, user_id (FK → users)                                    |
+| parents  | user_id (FK → users)                                               |
 
-## Security Vulnerabilities
+### Academic
+| Table            | Key Columns                                                    |
+| ---------------- | -------------------------------------------------------------- |
+| subjects         | name, description                                              |
+| courses          | unit_price, promotion, capacity, start_date, end_date, subject_id (FK) |
+| student_parents  | relation, is_primary, student_id, parent_id (pivot)            |
+| teacher_courses  | teacher_id, course_id (pivot)                                  |
+| schedules        | day_of_week, time_start, time_out, room_id, teacher_course_id  |
+| attendances      | date, time_in, time_out, status (late/persent/permission/absent), user_id, teacher_course_id (FK) |
+| enrollments      | enrollment_date, status, student_id, course_id                 |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Financials
+| Table    | Key Columns                                                    |
+| -------- | -------------------------------------------------------------- |
+| invoices | total_amount, due_date, status, enrollment_id                  |
+| payments | amount_paid, payment_method, payment_date, status, invoice_id  |
+| payrolls | base_salary, bonus, deduction, net_salary, pay_date, pay_period_start, pay_period_end, teacher_id |
+
+### Exams & Results
+| Table   | Key Columns                              |
+| ------- | ---------------------------------------- |
+| exams   | exam_date, exam_type, subject_id, teacher_id, course_id |
+| results | score, grade, enrollment_id, exam_id     |
+
+### System
+| Table    | Key Columns          |
+| -------- | -------------------- |
+| settings | key (unique), value  |
+
+### Library
+| Table        | Key Columns                                              |
+| ------------ | -------------------------------------------------------- |
+| books        | title, isbn (unique), category                           |
+| book_copies  | barcode (unique), status (available/borrowed/lost), book_id |
+| authors      | name, gender, date_of_birth, nation                      |
+| book_authors | book_id, author_id (pivot)                               |
+| book_loans   | loan_date, due_date, return_date, status, book_copy_id, user_id, library_staff_id |
+| fines        | amount, paid_status, book_loan_id                        |
+
+### Facilities
+| Table     | Key Columns                                |
+| --------- | ------------------------------------------ |
+| buildings | name, total_floors, address_location       |
+| floors    | floor_number, building_id                  |
+| rooms     | room_number (unique), room_type, capacity, floor_id |
+
+---
+
+## Authentication & Authorization
+
+- **Sanctum tokens** returned on login/register as Bearer tokens.
+- **CheckRole middleware** (alias `role`, registered in `app/Http/Kernel.php`) checks `role_id` against allowed IDs.
+- **Roles seeded:** Admin (1), Teacher (2), Library_staff (3), Student (4), Parent (5).
+- **Route usage:** `middleware('role:1')` restricts to Admin.
+
+---
+
+## API Routes
+
+All CRUD resources use `auth:sanctum`. Admin-only resources additionally use `role:1`.
+
+`sanctum` (authenticated): `/register`, `/login`, `/logout`, `/me`, `/profile`, `/profile/password`, `/upload`.
+
+`role:1` (admin) resources:
+
+- `/user`, `/role`, `/student`, `/teacher`, `/subject`, `/building`, `/parent`, `/course`, `/payment`, `/enrollment`, `/exam`, `/invoice`, `/result`, `/floor`, `/payroll`, `/room`, `/schedule`, `/attendance`, `/teacher-course`, `/author`, `/book`, `/book-copy`, `/book-loan`
+
+Other admin endpoints: `/dashboard/summary`, `/setting`.
+
+**Not yet wired:** `StudentParent` (implemented); `BookAuthor`, `Fine` (stubs).
+
+---
+
+## Installation & Setup
+
+Requires PHP 8.1+, Composer, and Docker.
+
+```bash
+# Start PostgreSQL
+docker compose up -d
+
+# Install dependencies
+composer install
+npm install
+
+# Environment setup
+cp .env.example .env
+php artisan key:generate
+
+# Run migrations and seed
+php artisan migrate:fresh --seed
+
+# Start dev server
+php artisan serve
+```
+
+---
+
+## Code Conventions
+
+1. **User code format:** `USR-{YEAR}-{sequential:3digits}` (e.g., `USR-2026-001`) generated via `User::lockForUpdate()->latest()` + `str_pad`.
+2. **DB transactions:** Multi-table operations wrapped in `DB::beginTransaction()` / `commit()` / `rollBack()`.
+3. **Cloudinary uploads:** Static `CloudinaryService::upload($file, $folder)` / `delete($imageUrl)`.
+4. **Response format:** `{ "message": "...", "data": ... }` with HTTP status codes.
+5. **Model naming:** Plural — `Students`, `Teachers`, `Courses`, `Books`.
+6. **Form validation:** Via `StoreUserRequest` with `sometimes` and `Rule::unique()->ignore()`.
+7. **Eager loading:** `Students::with('user.role')`.
+8. **Route model binding:** Controllers use type-hinted models, though newer controllers use `string $id` + `findOrFail`.
+
+---
+
+## Known Issues
+
+1. **Migration/model mismatches** — e.g., `Books::book_loans()` references a non-existent `book_id` column; misnamed relations on `BookLoans`; self-referencing `Authors::authors()` method; `Fine` vs `Fines` naming.
+2. **Route security gap** — The `/user` apiResource is registered **without** `auth:sanctum` / `role:1` middleware; any unauthenticated request can CRUD users.
+3. **Library module stubs** — `BookAuthor` and `Fine` controllers still have empty method bodies.
+4. **No application tests** written yet (only default example tests).
+5. **phpunit.xml** — SQLite in-memory DB is commented out; tests need PostgreSQL.
+6. **`.env`** with real credentials (including Cloudinary URL) is in the repository.
+
+---
 
 ## License
 
