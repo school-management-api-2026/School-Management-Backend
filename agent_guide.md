@@ -4,7 +4,7 @@
 
 A Laravel 10 REST API for managing a school system: users, students, teachers, parents, academic courses, exams, enrollments, finances, library, and facilities.
 
-**Status:** Intermediate development. Core auth and most CRUD controllers are implemented and wired. Library module: Author, Book, BookCopy and BookLoan are implemented and wired; BookAuthor and Fine remain stubs with empty method bodies. TeacherCourse is implemented and wired; StudentParent is implemented but not yet wired into routes.
+**Status:** Intermediate development. Core auth and most CRUD controllers are implemented and wired. Library module: Author, Book, BookCopy, BookLoan and Fine are implemented and wired; BookAuthor remains a stub with empty method bodies. TeacherCourse is implemented and wired; StudentParent is implemented but not yet wired into routes.
 
 ---
 
@@ -29,7 +29,7 @@ app/
 ├── Console/Kernel.php
 ├── Exceptions/Handler.php
 ├── Http/
-│   ├── Controllers/          # 28 controllers (26 implemented, 2 stubs)
+│   ├── Controllers/          # 30 controllers (29 implemented, 1 stub)
 │   ├── Kernel.php            # Middleware alias `role` → CheckRole
 │   ├── Middleware/CheckRole.php  # Custom RBAC middleware
 │   └── Requests/StoreUserRequest.php  # Form validation
@@ -138,7 +138,7 @@ Invoice hasMany Payments
 
 ## API Routes (Currently Registered)
 
-All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `middleware('role:1')`.
+All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `middleware('role:1')`; a growing set of academic resources allow Admin+Teacher via `middleware('role:1,2')`.
 
 | Method | URI              | Controller             | Auth       | Status    |
 | ------ | ---------------- | ---------------------- | ---------- | --------- |
@@ -151,27 +151,28 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 | POST   | /api/upload      | UploadController       | Sanctum     | Implemented |
 | *      | /api/user        | UserController         | **none** (bug, see Known Issues) | Implemented |
 | *      | /api/role        | RoleController         | role:1     | Implemented |
-| *      | /api/student     | StudentController      | role:1     | Implemented |
+| *      | /api/student     | StudentController      | role:1,2   | Implemented |
 | *      | /api/teacher     | TeacherController      | role:1     | Implemented |
-| *      | /api/subject     | SubjectController      | role:1     | Implemented |
+| *      | /api/subject     | SubjectController      | role:1,2   | Implemented |
 | *      | /api/building    | BuildingController     | role:1     | Implemented |
-| *      | /api/parent      | ParentController       | role:1     | Implemented |
-| *      | /api/course      | CourseController       | role:1     | Implemented |
+| *      | /api/parent      | ParentController       | role:1,2   | Implemented |
+| *      | /api/course      | CourseController       | role:1,2   | Implemented |
 | *      | /api/payment     | PaymentController      | role:1     | Implemented |
-| *      | /api/enrollment  | EnrollmentController   | role:1     | Implemented |
-| *      | /api/exam        | ExamController         | role:1     | Implemented |
+| *      | /api/enrollment  | EnrollmentController   | role:1,2   | Implemented |
+| *      | /api/exam        | ExamController         | role:1,2   | Implemented |
 | *      | /api/invoice     | InvoiceController      | role:1     | Implemented |
-| *      | /api/result      | ResultController       | role:1     | Implemented |
+| *      | /api/result      | ResultController       | role:1,2   | Implemented |
 | *      | /api/floor       | FloorController        | role:1     | Implemented |
 | *      | /api/payroll     | PayrollController      | role:1     | Implemented |
-| *      | /api/room        | RoomController         | role:1     | Implemented |
-| *      | /api/schedule    | ScheduleController     | role:1     | Implemented |
-| *      | /api/attendance  | AttendanceController   | role:1     | Implemented |
-| *      | /api/teacher-course | TeacherCourseController | role:1  | Implemented |
+| *      | /api/room        | RoomController         | role:1,2   | Implemented |
+| *      | /api/schedule    | ScheduleController     | role:1,2   | Implemented |
+| *      | /api/attendance  | AttendanceController   | role:1,2   | Implemented |
+| *      | /api/teacher-course | TeacherCourseController | role:1,2 | Implemented |
 | *      | /api/author      | AuthorController       | role:1     | Implemented |
 | *      | /api/book        | BookController         | role:1     | Implemented |
 | *      | /api/book-copy   | BookCopyController     | role:1     | Implemented |
 | *      | /api/book-loan   | BookLoanController     | role:1     | Implemented |
+| *      | /api/fine        | FineController         | role:1     | Implemented |
 
 | GET    | /api/dashboard/summary | DashboardController | role:1     | Implemented |
 | GET/POST | /api/setting | SettingController | role:1 | Implemented |
@@ -179,7 +180,7 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 `* = apiResource (GET /, GET /{id}, POST, PUT /{id}, DELETE /{id})`
 
 **Not yet wired (implemented but not registered in routes):** StudentParent.
-**Not yet wired (stubs):** BookAuthor, Fine.
+**Not yet wired (stub):** BookAuthor.
 
 ---
 
@@ -188,7 +189,7 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
 - **Sanctum tokens** returned on login/register as Bearer tokens
 - **CheckRole middleware** (alias `role`, registered in `app/Http/Kernel.php`) checks `role_id` against allowed IDs
 - **Roles seeded:** Admin(1), Teacher(2), Library_staff(3), Student(4), Parent(5)
-- **Route usage:** `middleware('role:1')` restricts to Admin
+- **Route usage:** `middleware('role:1')` restricts to Admin; `middleware('role:1,2')` allows Admin and Teacher
 - **Known gap:** the `/user` apiResource is registered outside the `auth:sanctum` group with no middleware (see Known Issues)
 
 ---
@@ -232,7 +233,7 @@ All CRUD resources use `middleware('auth:sanctum')`. Admin-only resources use `m
    - `Fine` verb vs `Fines` model naming — `BookLoans::fines()` references `fines::class` directly
    - `schedule`/`attendance` mismatches were fixed via migrations: `day_of_week` added to `schedules`, `user_id` added to `attendances`, and `attendances.time_in`/`time_out` made nullable
 2. **Route security gap** — `/user` apiResource is registered **without** `auth:sanctum` / `role:1` middleware (only a comment says "only admin"); any unauthenticated request can CRUD users
-3. **Library module stubs** — BookAuthor and Fine controllers still have empty method bodies (Book, BookCopy, BookLoan, Author are implemented)
+3. **Library module stub** — BookAuthor controller still has empty method bodies (Author, Book, BookCopy, BookLoan, Fine are implemented)
 4. **No application tests** written yet (only default example tests)
 5. **phpunit.xml** — SQLite in-memory DB is commented out; tests need PostgreSQL
 6. **`.env`** with real credentials (including Cloudinary URL) is in the repository
