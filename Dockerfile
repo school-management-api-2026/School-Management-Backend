@@ -28,10 +28,7 @@ RUN composer install --no-interaction --optimize-autoloader
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# រត់ Migration មុនពេលចាប់ផ្តើម Server
-RUN php artisan migrate --force
-
-# ប្រើប្រាស់ PHP Built-in Server
+# ប្រើប្រាស់ PHP Built-in Server និងរត់ Migration ពេលចាប់ផ្តើម Server តែម្ដង
 ENV PORT=10000
 EXPOSE 10000
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
