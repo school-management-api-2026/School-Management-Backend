@@ -28,9 +28,10 @@ RUN composer install --no-interaction --optimize-autoloader
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# កំណត់ Port សម្រាប់ Render (Render ជាទូទៅប្រើប្រាស់ Port 10000 ស្រាប់)
+# រត់ Migration មុនពេលចាប់ផ្តើម Server
+RUN php artisan migrate --force
+
+# ប្រើប្រាស់ PHP Built-in Server
 ENV PORT=10000
 EXPOSE 10000
-
-# ប្រើប្រាស់ PHP Built-in Server ជំនួសឱ្យ php-fpm ដើម្បីឱ្យ Render អាចចាប់យក HTTP Port បាន
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
